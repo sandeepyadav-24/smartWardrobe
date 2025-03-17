@@ -64,7 +64,7 @@ export default function DashboardLayout({
                    md:translate-x-0`}
       >
         <div className="p-4">
-          <h1 className="text-xl font-bold mb-8">Wardrobe AI</h1>
+          <h1 className="text-xl font-bold mb-8">smartWardrobe</h1>
           <nav className="space-y-2">
             {links.map((link) => (
               <motion.a

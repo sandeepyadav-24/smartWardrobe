@@ -53,7 +53,7 @@ export const Navbar = () => {
       <div className="flex justify-between items-center p-4 max-w-7xl mx-auto">
         <div className="flex items-center space-x-2">
           <FaLeaf className="text-green-500 text-2xl" />
-          <span className="text-xl font-bold">tryon</span>
+          <span className="text-xl font-bold">smartWardrobe</span>
         </div>
 
         <div className="hidden md:flex space-x-8">
