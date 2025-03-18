@@ -1,7 +1,8 @@
 "use client";
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaLeaf } from "react-icons/fa";
+import { FaLeaf, FaGithub, FaTwitter } from "react-icons/fa";
+import Image from "next/image";
 
 interface CardProps {
   color: string;
@@ -49,9 +50,11 @@ const Card = ({ color, delay, label, imageUrl, index }: CardProps) => {
         {/* Card Content */}
         <div className="relative w-full h-full">
           {imageUrl ? (
-            <img
+            <Image
               src={imageUrl}
               alt={label}
+              width={500}
+              height={300}
               className="w-full h-full object-cover"
             />
           ) : (

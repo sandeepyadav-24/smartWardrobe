@@ -4,12 +4,12 @@ import { motion } from "framer-motion";
 import { FaLeaf } from "react-icons/fa";
 //import { signInWithGoogle, signOut } from "@/lib/supabase";
 //import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+// const router = useRouter(); // Remove this line if not needed
+import { useSession, signIn, signOut } from "next-auth/react";
 
 export const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   //const { user, loading } = useAuth();
-  const router = useRouter();
 
   // Handle scroll effect
   useEffect(() => {

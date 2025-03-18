@@ -15,6 +15,7 @@ import {
   FaShoePrints,
   FaHatCowboy,
 } from "react-icons/fa";
+import Image from "next/image";
 
 interface ClothingStats {
   totalItems: number;
@@ -155,9 +156,11 @@ export default function DashboardPage() {
           {stats.recentlyAdded.map((item) => (
             <div key={item.id} className="relative">
               <div className="aspect-square rounded-lg overflow-hidden">
-                <img
+                <Image
                   src={item.imageUrl}
                   alt={item.name}
+                  width={200}
+                  height={200}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -177,9 +180,11 @@ export default function DashboardPage() {
           {stats.mostWorn.map((item) => (
             <div key={item.id} className="relative">
               <div className="aspect-square rounded-lg overflow-hidden">
-                <img
+                <Image
                   src={item.imageUrl}
                   alt={item.name}
+                  width={200}
+                  height={200}
                   className="w-full h-full object-cover"
                 />
               </div>
