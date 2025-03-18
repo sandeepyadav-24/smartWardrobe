@@ -15,6 +15,8 @@ import {
   FaUpload,
   FaWindowClose,
 } from "react-icons/fa";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 //import { useAuth } from "@/context/AuthContext";
 
 // Types
@@ -299,6 +301,16 @@ const AddItemModal = ({
 };
 
 export default function ClosetPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/auth/signin");
+    }
+  }, [status, router]);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] =
     useState<ClothingCategory>("All");

@@ -4,6 +4,8 @@ import path from "path";
 import { writeFile } from "fs/promises";
 import { mkdir } from "fs/promises";
 import { uploadToCloudinary } from "../../functions/cloudinaryImage";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/route";
 
 const prisma = new PrismaClient();
 
@@ -11,6 +13,12 @@ const prisma = new PrismaClient();
 export async function POST(request: Request) {
   try {
     console.log("POST /api/clothing - Starting request");
+
+    // Get the authenticated user
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const formData = await request.formData();
     const file = formData.get("file") as File;
@@ -65,11 +73,11 @@ export async function POST(request: Request) {
 
       console.log("Image uploaded successfully to Cloudinary:", imageUrl);
 
-      // Save to database using Prisma
+      // Save to database using Prisma with the user's ID
       console.log("Saving to database...");
       const clothingItem = await prisma.clothing_items.create({
         data: {
-          user_id: "1", // Replace with actual user ID when auth is added
+          user_id: session.user.id, // Use the authenticated user's ID
           name,
           category,
           image_url: imageUrl,
@@ -114,9 +122,15 @@ export async function POST(request: Request) {
 // Get all clothing items for the current user
 export async function GET(request: Request) {
   try {
+    // Get the authenticated user
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const clothingItems = await prisma.clothing_items.findMany({
       where: {
-        user_id: "1", // Replace with actual user ID when auth is added
+        user_id: session.user.id, // Use the authenticated user's ID
       },
       orderBy: {
         created_at: "desc",

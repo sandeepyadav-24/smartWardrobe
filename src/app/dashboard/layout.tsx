@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { signOut, useSession } from "next-auth/react";
 import {
   FaHome,
   FaTshirt,
@@ -10,6 +11,9 @@ import {
   FaChartLine,
   FaBars,
   FaTimes,
+  FaCog,
+  FaSignOutAlt,
+  FaMagic,
 } from "react-icons/fa";
 
 export default function DashboardLayout({
@@ -20,6 +24,11 @@ export default function DashboardLayout({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const { data: session } = useSession();
+
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: "/" });
+  };
 
   const links = [
     { href: "/dashboard", icon: <FaHome />, label: "Dashboard" },
@@ -30,7 +39,13 @@ export default function DashboardLayout({
       label: "Outfit Planner",
     },
     { href: "/dashboard/stylist", icon: <FaRobot />, label: "AI Stylist" },
+    {
+      href: "/dashboard/virtual-tryon",
+      icon: <FaMagic />,
+      label: "Virtual Try-On",
+    },
     { href: "/dashboard/analytics", icon: <FaChartLine />, label: "Analytics" },
+    { href: "/dashboard/settings", icon: <FaCog />, label: "Settings" },
   ];
 
   return (
@@ -63,9 +78,37 @@ export default function DashboardLayout({
                    ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
                    md:translate-x-0`}
       >
-        <div className="p-4">
+        <div className="p-4 flex flex-col h-full">
           <h1 className="text-xl font-bold mb-8">smartWardrobe</h1>
-          <nav className="space-y-2">
+
+          {/* User info at the top */}
+          {session?.user && (
+            <div className="mb-6 flex items-center">
+              <div className="w-10 h-10 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden">
+                {session.user.image ? (
+                  <img
+                    src={session.user.image}
+                    alt={session.user.name || "User"}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-green-500 text-white">
+                    {session.user.name?.charAt(0) || "U"}
+                  </div>
+                )}
+              </div>
+              <div className="ml-3 overflow-hidden">
+                <p className="text-sm font-medium truncate">
+                  {session.user.name}
+                </p>
+                <p className="text-xs text-gray-500 truncate">
+                  {session.user.email}
+                </p>
+              </div>
+            </div>
+          )}
+
+          <nav className="space-y-2 flex-grow">
             {links.map((link) => (
               <motion.a
                 key={link.href}
@@ -88,6 +131,18 @@ export default function DashboardLayout({
               </motion.a>
             ))}
           </nav>
+
+          {/* Logout button at the bottom */}
+          <button
+            onClick={handleSignOut}
+            className="mt-auto flex items-center space-x-3 px-4 py-3 rounded-lg
+                     text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors"
+          >
+            <span className="text-lg">
+              <FaSignOutAlt />
+            </span>
+            <span>Logout</span>
+          </button>
         </div>
       </motion.aside>
 
