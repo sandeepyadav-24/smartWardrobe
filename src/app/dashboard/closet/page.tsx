@@ -132,7 +132,7 @@ const AddItemModal = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="min-h-screen h-screen overflow-y-auto fixed inset-0  bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -384,83 +384,96 @@ export default function ClosetPage() {
   });
 
   return (
-    <div className="h-full bg-gray-50">
+    <div className="h-screen overflow-y-auto bg-gray-50">
       {/* Desktop Header */}
-      <div className="hidden md:block border-b bg-white">
+      <div className="hidden md:block sticky top-0 z-20 border-b bg-white/95 backdrop-blur-md">
         <div className="max-w-[100rem] mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-800">Smart Closet</h1>
+            <motion.h1
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 
+                       bg-clip-text text-transparent"
+            >
+              Smart Closet
+            </motion.h1>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="flex items-center space-x-2 px-6 py-2 bg-green-500 text-white 
-                       rounded-lg hover:bg-green-600 transition-colors"
+              className="flex items-center space-x-2 px-6 py-2.5 bg-gradient-to-r 
+                       from-blue-600 to-blue-800 text-white rounded-xl shadow-md 
+                       hover:shadow-lg transition-all duration-200"
               onClick={() => setIsAddModalOpen(true)}
             >
-              <FaPlus />
+              <FaPlus className="text-white/90" />
               <span>Add New Item</span>
             </motion.button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Header */}
-      <div className="md:hidden fixed bottom-6 right-6 z-50">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setIsAddModalOpen(true)}
-          className="w-14 h-14 bg-green-500 rounded-full flex items-center justify-center 
-                     text-white shadow-lg hover:bg-green-600 transition-colors"
-        >
-          <FaPlus className="w-6 h-6" />
-        </motion.button>
-      </div>
-
       {/* Main Content */}
-      <div className="max-w-[100rem] mx-auto px-4">
+      <div className="max-w-[100rem] mx-auto px-4 pb-24 md:pb-8">
         {/* Search and Filters */}
         <div className="my-6">
-          <div className="flex space-x-4 items-center">
-            <div className="relative flex-1">
+          <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+            <motion.div
+              className="relative flex-1"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
               <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search your closet..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg 
-                         focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl 
+                         bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 
+                         focus:ring-blue-500 transition-all duration-200"
               />
-            </div>
-            <button
+            </motion.div>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
               onClick={() => setIsFilterOpen(!isFilterOpen)}
-              className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+              className="p-3 bg-white/80 backdrop-blur-sm border border-gray-200 
+                       rounded-xl hover:bg-gray-50 md:self-start shadow-sm 
+                       hover:shadow transition-all duration-200"
             >
               <FaFilter className="text-gray-600" />
-            </button>
+            </motion.button>
           </div>
         </div>
 
         {/* Category Filters */}
-        <div className="flex space-x-2 overflow-x-auto pb-4 scrollbar-hide">
+        <motion.div
+          className="flex space-x-2 overflow-x-auto pb-4 scrollbar-hide"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
           {categories.map((category) => (
             <motion.button
               key={category.label}
-              whileHover={{ y: -2 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => setSelectedCategory(category.label)}
-              className={`flex-shrink-0 flex items-center space-x-2 px-4 py-2 rounded-lg 
-                       transition-colors ${
-                         selectedCategory === category.label
-                           ? "bg-green-500 text-white"
-                           : "bg-white text-gray-600 hover:bg-gray-50"
-                       }`}
+              className={`px-4 py-2 rounded-xl whitespace-nowrap transition-all duration-200
+                        ${
+                          selectedCategory === category.label
+                            ? "bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-md"
+                            : "bg-white/80 backdrop-blur-sm text-gray-600 hover:bg-gray-50"
+                        }`}
             >
-              {category.icon}
-              <span className="whitespace-nowrap">{category.label}</span>
+              {category.label}
             </motion.button>
           ))}
-        </div>
+        </motion.div>
 
         {/* Loading State */}
         {loading && (
@@ -501,12 +514,21 @@ export default function ClosetPage() {
 
         {/* Clothing Grid */}
         {!loading && !error && filteredItems.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-6">
-            {filteredItems.map((item) => (
+          <motion.div
+            className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+          >
+            {filteredItems.map((item, index) => (
               <motion.div
                 key={item.id}
-                whileHover={{ y: -5 }}
-                className="bg-white rounded-xl shadow-sm overflow-hidden"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ y: -5, scale: 1.02 }}
+                className="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm hover:shadow-md 
+                         transition-all duration-200 overflow-hidden"
               >
                 <div className="aspect-square relative">
                   <img
@@ -538,9 +560,28 @@ export default function ClosetPage() {
                 </div>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         )}
       </div>
+
+      {/* Mobile Add Button */}
+      <motion.div
+        className="md:hidden fixed bottom-6 right-6 z-50"
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ type: "spring", stiffness: 260, damping: 20 }}
+      >
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => setIsAddModalOpen(true)}
+          className="w-14 h-14 bg-gradient-to-r from-blue-600 to-blue-800 
+                   rounded-full flex items-center justify-center text-white 
+                   shadow-lg hover:shadow-xl transition-all duration-200"
+        >
+          <FaPlus className="w-6 h-6" />
+        </motion.button>
+      </motion.div>
 
       {/* Add New Item Modal */}
       <AnimatePresence>

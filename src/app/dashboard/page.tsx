@@ -115,85 +115,182 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <h1 className="text-2xl font-bold text-gray-800 mb-8">
+    <div className="min-h-screen h-screen overflow-y-auto bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-8">
+      <motion.h1
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 
+                 bg-clip-text text-transparent mb-8"
+      >
         Wardrobe Dashboard
-      </h1>
+      </motion.h1>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-        <div className="bg-white p-6 rounded-xl shadow-sm">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8"
+      >
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          className="bg-white/90 backdrop-blur-sm p-6 rounded-xl shadow-sm hover:shadow-md 
+                   transition-all duration-200 border border-gray-100"
+        >
           <h3 className="text-gray-500 text-sm mb-2">Total Items</h3>
-          <p className="text-3xl font-bold">{stats.totalItems}</p>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm">
+          <p
+            className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 
+                     bg-clip-text text-transparent"
+          >
+            {stats.totalItems}
+          </p>
+        </motion.div>
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          className="bg-white/90 backdrop-blur-sm p-6 rounded-xl shadow-sm hover:shadow-md 
+                   transition-all duration-200 border border-gray-100"
+        >
           <h3 className="text-gray-500 text-sm mb-2">Favorites</h3>
-          <p className="text-3xl font-bold text-red-500">
+          <p
+            className="text-3xl font-bold bg-gradient-to-r from-red-500 to-red-600 
+                     bg-clip-text text-transparent"
+          >
             {stats.favoriteItems}
           </p>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Category Breakdown */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-        {Object.entries(stats.categoryCount).map(([category, count]) => (
-          <div key={category} className="bg-white p-6 rounded-xl shadow-sm">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8"
+      >
+        {Object.entries(stats.categoryCount).map(([category, count], index) => (
+          <motion.div
+            key={category}
+            whileHover={{ scale: 1.02 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+            className="bg-white/90 backdrop-blur-sm p-6 rounded-xl shadow-sm hover:shadow-md 
+                     transition-all duration-200 border border-gray-100"
+          >
             <div className="flex items-center justify-between mb-4">
-              <div className="text-green-500">
+              <div className="text-blue-600">
                 {categoryIcons[category as keyof typeof categoryIcons]}
               </div>
-              <span className="text-2xl font-bold">{count}</span>
+              <span
+                className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 
+                           bg-clip-text text-transparent"
+              >
+                {count}
+              </span>
             </div>
-            <h3 className="text-gray-600">{category}</h3>
-          </div>
+            <h3 className="text-gray-600 font-medium">{category}</h3>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
       {/* Recent Items */}
-      <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-4">Recently Added</h2>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm hover:shadow-md 
+                 transition-all duration-200 p-6 mb-8 border border-gray-100"
+      >
+        <h2
+          className="text-xl font-semibold bg-gradient-to-r from-gray-800 to-gray-600 
+                     bg-clip-text text-transparent mb-4"
+        >
+          Recently Added
+        </h2>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          {stats.recentlyAdded.map((item) => (
-            <div key={item.id} className="relative">
-              <div className="aspect-square rounded-lg overflow-hidden">
+          {stats.recentlyAdded.map((item, index) => (
+            <motion.div
+              key={item.id}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: index * 0.1 }}
+              className="relative group"
+            >
+              <div
+                className="aspect-square rounded-lg overflow-hidden shadow-sm 
+                           group-hover:shadow-md transition-all duration-200"
+              >
                 <Image
                   src={item.imageUrl}
                   alt={item.name}
                   width={200}
                   height={200}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transform group-hover:scale-105 
+                           transition-transform duration-200"
                 />
               </div>
-              <p className="mt-2 text-sm font-medium truncate">{item.name}</p>
+              <p className="mt-2 text-sm font-medium text-gray-700 truncate">
+                {item.name}
+              </p>
               {item.favorite && (
-                <FaHeart className="absolute top-2 right-2 text-red-500" />
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute top-2 right-2 text-red-500"
+                >
+                  <FaHeart className="w-5 h-5 drop-shadow-md" />
+                </motion.div>
               )}
-            </div>
+            </motion.div>
           ))}
         </div>
-      </div>
+      </motion.div>
 
       {/* Most Worn Items */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
-        <h2 className="text-xl font-semibold mb-4">Most Worn</h2>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm hover:shadow-md 
+                 transition-all duration-200 p-6 border border-gray-100"
+      >
+        <h2
+          className="text-xl font-semibold bg-gradient-to-r from-gray-800 to-gray-600 
+                     bg-clip-text text-transparent mb-4"
+        >
+          Most Worn
+        </h2>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          {stats.mostWorn.map((item) => (
-            <div key={item.id} className="relative">
-              <div className="aspect-square rounded-lg overflow-hidden">
+          {stats.mostWorn.map((item, index) => (
+            <motion.div
+              key={item.id}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: index * 0.1 }}
+              className="relative group"
+            >
+              <div
+                className="aspect-square rounded-lg overflow-hidden shadow-sm 
+                           group-hover:shadow-md transition-all duration-200"
+              >
                 <Image
                   src={item.imageUrl}
                   alt={item.name}
                   width={200}
                   height={200}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transform group-hover:scale-105 
+                           transition-transform duration-200"
                 />
               </div>
-              <p className="mt-2 text-sm font-medium truncate">{item.name}</p>
-              <p className="text-sm text-gray-500">{item.wears || 0} wears</p>
-            </div>
+              <p className="mt-2 text-sm font-medium text-gray-700 truncate">
+                {item.name}
+              </p>
+              <p className="text-sm text-blue-600 font-medium">
+                {item.wears || 0} wears
+              </p>
+            </motion.div>
           ))}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

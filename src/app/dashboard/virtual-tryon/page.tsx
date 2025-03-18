@@ -2,8 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { FaTshirt, FaSocks, FaHatCowboy } from "react-icons/fa";
+import {
+  FaTshirt,
+  FaSocks,
+  FaHatCowboy,
+  FaTimes,
+  FaDownload,
+} from "react-icons/fa";
 import { GiArmoredPants, GiMonclerJacket } from "react-icons/gi";
+import { motion, AnimatePresence } from "framer-motion";
 
 type ClothingCategory =
   | "Tops"
@@ -245,258 +252,348 @@ export default function VirtualTryOnPage() {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold mb-8">Virtual Try-On</h1>
-
-      {!fullBodyImage ? (
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
-          <p className="text-yellow-700">
-            Please upload a full body image in your settings to use the virtual
-            try-on feature.
-          </p>
-          <button
-            onClick={() => (window.location.href = "/dashboard/settings")}
-            className="mt-2 text-sm font-medium text-yellow-700 underline"
+    <div className="min-h-screen h-screen flex flex-col bg-[#f8fafc]">
+      {/* Sticky Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b 
+                 border-gray-100 px-4 md:px-8 py-4"
+      >
+        <div className="max-w-[1800px] mx-auto">
+          <h1
+            className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 
+                       bg-clip-text text-transparent"
           >
-            Go to Settings
-          </button>
+            Virtual Try-On Studio
+          </h1>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left panel - Categories and clothing items */}
-          <div className="lg:col-span-1 bg-white rounded-lg shadow-md p-4">
-            <div className="flex overflow-x-auto mb-4 pb-2">
-              {categories.map((category) => (
-                <button
-                  key={category.label}
-                  onClick={() => setSelectedCategory(category.label)}
-                  className={`flex flex-col items-center justify-center p-3 mx-1 rounded-lg min-w-[80px] ${
-                    selectedCategory === category.label
-                      ? "bg-green-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  <span className="text-lg mb-1">{category.icon}</span>
-                  <span className="text-xs">{category.label}</span>
-                </button>
-              ))}
-            </div>
+      </motion.div>
 
-            <div className="h-[500px] overflow-y-auto">
-              {clothingItems[selectedCategory].length === 0 ? (
-                <p className="text-center text-gray-500 py-8">
-                  No {selectedCategory.toLowerCase()} found in your closet
-                </p>
-              ) : (
-                <div className="grid grid-cols-2 gap-3">
-                  {clothingItems[selectedCategory].map((item) => (
-                    <div
-                      key={item.id}
-                      onClick={() => handleItemSelect(item)}
-                      className={`cursor-pointer rounded-lg overflow-hidden border-2 ${
-                        selectedItems[selectedCategory as ClothingCategory]
-                          ?.id === item.id
-                          ? "border-green-500"
-                          : "border-transparent"
-                      }`}
-                    >
-                      <div className="h-32 bg-gray-100">
-                        <img
-                          src={item.imageUrl}
-                          alt={item.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="p-2">
-                        <p className="text-sm font-medium truncate">
-                          {item.name}
+      {/* Main Content - Scrollable */}
+      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="max-w-[1800px] mx-auto"
+        >
+          {!fullBodyImage ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white border-l-4 border-blue-500 p-8 rounded-2xl shadow-lg mb-6"
+            >
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="space-y-2">
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Complete Your Profile
+                  </h2>
+                  <p className="text-gray-600">
+                    Upload a full body image to start creating amazing virtual
+                    try-ons
+                  </p>
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => (window.location.href = "/dashboard/settings")}
+                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 
+                           text-white rounded-xl shadow-md hover:shadow-xl 
+                           transition-all duration-200"
+                >
+                  Go to Settings
+                </motion.button>
+              </div>
+            </motion.div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Left Column - User Image and Clothing Selection */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="space-y-6"
+              >
+                {/* User Image */}
+                <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-6">
+                    Your Photo
+                  </h2>
+                  <div
+                    className="h-[calc(100vh-400px)] min-h-[500px] rounded-xl overflow-hidden 
+                               shadow-inner bg-gradient-to-br from-gray-50 to-gray-100"
+                  >
+                    <img
+                      src={fullBodyImage}
+                      alt="Your full body"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                </div>
+
+                {/* Category Selection */}
+                <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                  <div className="flex overflow-x-auto space-x-3 mb-6 pb-2 scrollbar-hide">
+                    {categories.map((category) => (
+                      <motion.button
+                        key={category.label}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setSelectedCategory(category.label)}
+                        className={`flex flex-col items-center justify-center p-4 rounded-xl 
+                                 min-w-[90px] transition-all duration-300 ${
+                                   selectedCategory === category.label
+                                     ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg"
+                                     : "bg-gray-50 text-gray-700 hover:bg-gray-100"
+                                 }`}
+                      >
+                        <span className="text-2xl mb-2">{category.icon}</span>
+                        <span className="text-sm font-medium">
+                          {category.label}
+                        </span>
+                      </motion.button>
+                    ))}
+                  </div>
+
+                  {/* Clothing Items Grid */}
+                  <div className="h-[400px] overflow-y-auto rounded-xl">
+                    {clothingItems[selectedCategory].length === 0 ? (
+                      <div
+                        className="flex flex-col items-center justify-center h-full 
+                                   bg-gray-50 rounded-xl p-8 text-center"
+                      >
+                        <span className="text-5xl mb-4 text-gray-400">
+                          {
+                            categories.find((c) => c.label === selectedCategory)
+                              ?.icon
+                          }
+                        </span>
+                        <p className="text-gray-600">
+                          No {selectedCategory.toLowerCase()} found in your
+                          wardrobe
                         </p>
                       </div>
-                    </div>
-                  ))}
+                    ) : (
+                      <div className="grid grid-cols-3 gap-4">
+                        {clothingItems[selectedCategory].map((item) => (
+                          <motion.div
+                            key={item.id}
+                            whileHover={{ scale: 1.03, y: -2 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => handleItemSelect(item)}
+                            className={`cursor-pointer rounded-xl overflow-hidden 
+                                     transition-all duration-300 ${
+                                       selectedItems[selectedCategory]?.id ===
+                                       item.id
+                                         ? "ring-2 ring-blue-500 shadow-lg"
+                                         : "hover:shadow-md border border-gray-100"
+                                     }`}
+                          >
+                            <div className="aspect-square bg-gray-50">
+                              <img
+                                src={item.imageUrl}
+                                alt={item.name}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div className="p-2 bg-white">
+                              <p className="text-xs font-medium text-gray-800 truncate">
+                                {item.name}
+                              </p>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
-            </div>
-          </div>
+              </motion.div>
 
-          {/* Middle panel - User image and selected items */}
-          <div className="lg:col-span-1 bg-white rounded-lg shadow-md p-4 flex flex-col">
-            <h2 className="text-lg font-semibold mb-4">Your Selections</h2>
-
-            <div className="flex-grow flex flex-col items-center justify-center">
-              <div className="w-64 h-80 bg-gray-100 rounded-lg overflow-hidden mb-4">
-                <img
-                  src={fullBodyImage}
-                  alt="Your full body"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-
-              <div className="grid grid-cols-5 gap-2 w-full">
-                {categories.map((category) => (
-                  <div
-                    key={category.label}
-                    className="flex flex-col items-center"
+              {/* Right Column - Preview */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100"
+              >
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    Preview
+                  </h2>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={generateTryOn}
+                    disabled={isGenerating}
+                    className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 
+                             text-white rounded-xl shadow-md hover:shadow-lg 
+                             transition-all duration-200 disabled:from-gray-400 
+                             disabled:to-gray-500 disabled:cursor-not-allowed"
                   >
-                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-1">
-                      {selectedItems[category.label] ? (
-                        <img
-                          src={selectedItems[category.label]!.imageUrl}
-                          alt={selectedItems[category.label]!.name}
-                          className="w-8 h-8 object-cover rounded-full"
+                    {isGenerating ? (
+                      <div className="flex items-center space-x-2">
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{
+                            duration: 1,
+                            repeat: Infinity,
+                            ease: "linear",
+                          }}
+                          className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
                         />
-                      ) : (
-                        <span className="text-gray-400">{category.icon}</span>
+                        <span>Generating...</span>
+                      </div>
+                    ) : (
+                      "Generate Preview"
+                    )}
+                  </motion.button>
+                </div>
+
+                <div
+                  className="h-[calc(100vh-400px)] min-h-[500px] rounded-xl overflow-hidden 
+                             shadow-inner bg-gradient-to-br from-gray-50 to-gray-100 mb-6"
+                >
+                  {isGenerating ? (
+                    <div className="h-full flex flex-col items-center justify-center p-6 space-y-6">
+                      <div className="w-full max-w-md">
+                        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                          <motion.div
+                            className="h-full bg-gradient-to-r from-blue-500 to-blue-600"
+                            style={{ width: `${progressPercent}%` }}
+                            transition={{ duration: 0.3 }}
+                          />
+                        </div>
+                      </div>
+
+                      {currentProcessingItem && (
+                        <div className="text-center space-y-2">
+                          <p className="text-sm font-medium text-gray-700">
+                            Processing: {currentProcessingItem}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {progressMessage}
+                          </p>
+                        </div>
                       )}
                     </div>
-                    <span className="text-xs text-gray-500">
-                      {category.label}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <button
-              onClick={generateTryOn}
-              disabled={isGenerating}
-              className="w-full mt-4 py-3 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-            >
-              {isGenerating ? "Generating..." : "Generate Try-On"}
-            </button>
-
-            {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
-          </div>
-
-          {/* Right panel - Generated image */}
-          <div className="lg:col-span-1 bg-white rounded-lg shadow-md p-4 flex flex-col items-center justify-center">
-            <h2 className="text-lg font-semibold mb-4">Result</h2>
-
-            <div className="w-64 h-80 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
-              {isGenerating ? (
-                <div className="flex flex-col items-center p-4">
-                  <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+                  ) : generatedImage ? (
+                    <img
+                      src={generatedImage}
+                      alt="Virtual try-on result"
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
                     <div
-                      className="bg-green-500 h-2.5 rounded-full transition-all duration-300"
-                      style={{ width: `${progressPercent}%` }}
-                    ></div>
-                  </div>
-                  {currentProcessingItem && (
-                    <p className="text-sm font-medium text-gray-700 mb-2">
-                      Processing: {currentProcessingItem}
-                    </p>
-                  )}
-                  <p className="text-sm text-gray-500 text-center">
-                    {progressMessage}
-                  </p>
-
-                  {/* Show the latest intermediate image if available */}
-                  {generatedImage && (
-                    <div className="mt-4 w-full h-48 overflow-hidden rounded">
-                      <img
-                        src={generatedImage}
-                        alt="Current progress"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
-                </div>
-              ) : generatedImage ? (
-                <img
-                  src={generatedImage}
-                  alt="Virtual try-on result"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <p className="text-sm text-gray-500 text-center px-4">
-                  Select clothing items and click "Generate Try-On" to see the
-                  result
-                </p>
-              )}
-            </div>
-
-            {/* Show intermediate images carousel if available */}
-            {intermediateImages.length > 0 && (
-              <div className="mt-4 w-full">
-                <p className="text-sm font-medium mb-2">Progress Steps:</p>
-                <div className="flex overflow-x-auto space-x-2 pb-2">
-                  {intermediateImages.map((img, index) => (
-                    <div
-                      key={index}
-                      className="flex-shrink-0 w-16 h-16 rounded overflow-hidden cursor-pointer"
-                      onClick={() => setGeneratedImage(img)}
+                      className="h-full flex flex-col items-center justify-center p-6 
+                                 text-gray-400"
                     >
-                      <img
-                        src={img}
-                        alt={`Step ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
+                      <FaTshirt className="text-6xl mb-4" />
+                      <p className="text-center text-sm">
+                        Select items and click Generate Preview to see the
+                        result
+                      </p>
                     </div>
-                  ))}
+                  )}
                 </div>
-              </div>
-            )}
 
-            {generatedImage && !isGenerating && (
-              <button
-                onClick={() => setIsFullSizeModalOpen(true)}
-                className="mt-4 px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-900 transition-colors"
-              >
-                View Full Size
-              </button>
-            )}
-          </div>
-        </div>
-      )}
+                {/* Selected Items Preview */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-medium text-gray-700">
+                    Selected Items
+                  </h3>
+                  <div className="grid grid-cols-5 gap-3">
+                    {categories.map((category) => (
+                      <motion.div
+                        key={category.label}
+                        whileHover={{ scale: 1.05 }}
+                        className="aspect-square rounded-xl bg-gray-50 p-2 relative 
+                                 group transition-all duration-300"
+                      >
+                        {selectedItems[category.label] ? (
+                          <img
+                            src={selectedItems[category.label]!.imageUrl}
+                            alt={selectedItems[category.label]!.name}
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                        ) : (
+                          <div
+                            className="w-full h-full flex items-center justify-center 
+                                         text-gray-400"
+                          >
+                            {category.icon}
+                          </div>
+                        )}
+                        <div
+                          className="absolute inset-0 bg-black/60 rounded-xl opacity-0 
+                                     group-hover:opacity-100 transition-opacity duration-300 
+                                     flex items-center justify-center"
+                        >
+                          <span className="text-white text-xs font-medium">
+                            {category.label}
+                          </span>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
 
-      {/* Full Size Image Modal */}
-      {isFullSizeModalOpen && generatedImage && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="relative max-w-4xl max-h-[90vh] w-full">
-            <button
-              onClick={() => setIsFullSizeModalOpen(false)}
-              className="absolute top-2 right-2 bg-white rounded-full p-2 text-gray-800 hover:bg-gray-200 transition-colors z-10"
+                {error && (
+                  <div className="mt-4 bg-red-50 border-l-4 border-red-500 p-4 rounded-xl">
+                    <p className="text-red-700">{error}</p>
+                  </div>
+                )}
+              </motion.div>
+            </div>
+          )}
+        </motion.div>
+      </div>
+
+      {/* Full Size Modal */}
+      <AnimatePresence>
+        {isFullSizeModalOpen && generatedImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center 
+                     justify-center z-50 p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative max-w-5xl max-h-[90vh] w-full bg-white 
+                       rounded-2xl shadow-2xl overflow-hidden"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-            <div className="bg-white rounded-lg overflow-hidden">
+              <div className="absolute top-4 right-4 z-10 flex space-x-2">
+                <motion.a
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  href={generatedImage}
+                  download="virtual-tryon-result.jpg"
+                  className="p-2 bg-blue-600 text-white rounded-full shadow-lg 
+                           hover:bg-blue-700 transition-colors"
+                >
+                  <FaDownload className="w-5 h-5" />
+                </motion.a>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setIsFullSizeModalOpen(false)}
+                  className="p-2 bg-white text-gray-900 rounded-full shadow-lg 
+                           hover:bg-gray-100 transition-colors"
+                >
+                  <FaTimes className="w-5 h-5" />
+                </motion.button>
+              </div>
+
               <img
                 src={generatedImage}
                 alt="Virtual try-on result full size"
-                className="w-full h-auto object-contain"
+                className="w-full h-auto"
               />
-            </div>
-            <div className="mt-4 flex justify-center">
-              <a
-                href={generatedImage}
-                download="virtual-tryon-result.jpg"
-                className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors mr-4"
-              >
-                Download Image
-              </a>
-              <button
-                onClick={() => setIsFullSizeModalOpen(false)}
-                className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
