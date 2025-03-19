@@ -139,30 +139,6 @@ export default function PlannerPage() {
     }
   };
 
-  // Open create outfit modal with date
-  const openCreateOutfit = (date: Date) => {
-    setSelectedDate(date);
-
-    // Check if an outfit already exists for this date
-    const existingOutfit = outfits.find(
-      (outfit) => outfit.date && isSameDay(new Date(outfit.date), date)
-    );
-
-    if (existingOutfit) {
-      setCurrentOutfit(existingOutfit);
-      setOutfitName(existingOutfit.name);
-      setOutfitNotes(existingOutfit.notes || "");
-      setOutfitOccasion(existingOutfit.occasion || "");
-      setSelectedItems(existingOutfit.items);
-      setIsViewingOutfit(true);
-    } else {
-      resetOutfitForm();
-      setIsViewingOutfit(false);
-    }
-
-    setIsCreateOutfitOpen(true);
-  };
-
   // Reset outfit form
   const resetOutfitForm = () => {
     setOutfitName("");
@@ -222,7 +198,7 @@ export default function PlannerPage() {
   };
 
   // Get outfit for a specific date
-  const getOutfitForDate = (date: Date) => {
+  const getOutfitForDate = (date: Date): Outfit | undefined => {
     return outfits.find(
       (outfit) => outfit.date && isSameDay(new Date(outfit.date), date)
     );
@@ -408,32 +384,30 @@ export default function PlannerPage() {
                     )}
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                      {getOutfitForDate(selectedDate)?.items.map(
-                        (item, index) => (
-                          <motion.div
-                            key={item.id}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: index * 0.1 }}
-                            className="relative group"
-                          >
-                            <div
-                              className="aspect-square rounded-lg overflow-hidden shadow-sm 
+                      {getOutfitForDate(selectedDate)?.items.map((item) => (
+                        <motion.div
+                          key={item.id}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.1 }}
+                          className="relative group"
+                        >
+                          <div
+                            className="aspect-square rounded-lg overflow-hidden shadow-sm 
                                        group-hover:shadow-md transition-all duration-200"
-                            >
-                              <Image
-                                src={item.imageUrl}
-                                alt={item.name}
-                                className="w-full h-full object-cover transform 
+                          >
+                            <Image
+                              src={item.imageUrl}
+                              alt={item.name}
+                              className="w-full h-full object-cover transform 
                                        group-hover:scale-105 transition-transform duration-200"
-                              />
-                            </div>
-                            <p className="mt-2 text-sm font-medium text-gray-700 truncate">
-                              {item.name}
-                            </p>
-                          </motion.div>
-                        )
-                      )}
+                            />
+                          </div>
+                          <p className="mt-2 text-sm font-medium text-gray-700 truncate">
+                            {item.name}
+                          </p>
+                        </motion.div>
+                      ))}
                     </div>
 
                     {getOutfitForDate(selectedDate)?.notes && (

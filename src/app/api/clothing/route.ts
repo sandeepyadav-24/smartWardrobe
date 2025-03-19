@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { PrismaClient, Prisma } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import path from "path";
 import { writeFile, mkdir } from "fs/promises";
 import { uploadToCloudinary } from "../../functions/cloudinaryImage";

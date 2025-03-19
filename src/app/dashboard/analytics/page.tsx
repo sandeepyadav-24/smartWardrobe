@@ -30,14 +30,6 @@ interface ClothingAnalytics {
   category: string;
 }
 
-interface OutfitAnalytics {
-  id: string;
-  name: string;
-  timesWorn: number;
-  rating: number;
-  lastWorn: Date;
-}
-
 // Mock Data
 const mockClothingData: ClothingAnalytics[] = [
   {
@@ -184,7 +176,7 @@ export default function AnalyticsPage() {
                              space-y-4"
                 >
                   <h3 className="font-medium text-gray-800">
-                    Here's how to get started:
+                    Here&apos;s how to get started:
                   </h3>
                   <ul className="space-y-4">
                     {[

@@ -38,7 +38,7 @@ interface ClothingItem {
   id: string;
   name: string;
   category: ClothingCategory;
-  tags: ClothingTag[];
+  tags: string[];
   imageUrl: string;
   favorite: boolean;
   lastWorn?: Date;
@@ -320,22 +320,6 @@ const AddItemModal = ({
 export default function ClosetPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-
-  useEffect(() => {
-    if (status === "loading") return;
-    if (!session) {
-      router.replace("/auth/signin");
-    }
-  }, [session, status, router]);
-
-  if (status === "loading") {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] =
     useState<ClothingCategory>("All");
@@ -344,16 +328,13 @@ export default function ClosetPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const categories: { label: ClothingCategory; icon: React.ReactNode }[] = [
-    { label: "All", icon: <FaTshirt /> },
-    { label: "Tops", icon: <FaTshirt /> },
-    { label: "Bottoms", icon: <FaSocks /> },
-    { label: "Shoes", icon: <FaShoePrints /> },
-    { label: "Accessories", icon: <FaHatCowboy /> },
-    { label: "Outerwear", icon: <FaShoePrints /> },
-  ];
+  useEffect(() => {
+    if (status === "loading") return;
+    if (!session) {
+      router.replace("/auth/signin");
+    }
+  }, [session, status, router]);
 
-  // Fetch clothing items from the API
   useEffect(() => {
     const fetchClothingItems = async () => {
       try {
@@ -368,10 +349,10 @@ export default function ClosetPage() {
         }
 
         const { data } = await response.json();
-        const transformedData = data.map((item: any) => ({
+        const transformedData = data.map((item: ClothingItem) => ({
           id: item.id,
           name: item.name,
-          category: item.category as ClothingCategory,
+          category: item.category,
           tags: item.tags || [],
           imageUrl: item.imageUrl,
           favorite: item.favorite,
@@ -390,6 +371,23 @@ export default function ClosetPage() {
 
     fetchClothingItems();
   }, []);
+
+  if (status === "loading") {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  const categories: { label: ClothingCategory; icon: React.ReactNode }[] = [
+    { label: "All", icon: <FaTshirt /> },
+    { label: "Tops", icon: <FaTshirt /> },
+    { label: "Bottoms", icon: <FaSocks /> },
+    { label: "Shoes", icon: <FaShoePrints /> },
+    { label: "Accessories", icon: <FaHatCowboy /> },
+    { label: "Outerwear", icon: <FaShoePrints /> },
+  ];
 
   const handleAddItem = (newItem: ClothingItem) => {
     setClothingItems((prev) => [newItem, ...prev]);
@@ -500,6 +498,8 @@ export default function ClosetPage() {
                   <div className="aspect-square relative">
                     <Image
                       src={item.imageUrl}
+                      width={500}
+                      height={500}
                       alt={item.name}
                       className="w-full h-full object-cover"
                       loading="lazy"

@@ -3,11 +3,9 @@
 import { signIn } from "next-auth/react";
 import { FaGoogle } from "react-icons/fa";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
