@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaLeaf, FaGithub, FaTwitter } from "react-icons/fa";
+
 import Image from "next/image";
 
 interface CardProps {
@@ -12,7 +12,7 @@ interface CardProps {
   index: number;
 }
 
-const Card = ({ color, delay, label, imageUrl, index }: CardProps) => {
+const Card = ({ color, label, imageUrl, index }: CardProps) => {
   const [isHovered, setIsHovered] = React.useState(false);
 
   return (

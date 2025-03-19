@@ -1,11 +1,20 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 import path from "path";
-import { writeFile } from "fs/promises";
-import { mkdir } from "fs/promises";
+import { writeFile, mkdir } from "fs/promises";
 import { uploadToCloudinary } from "../../functions/cloudinaryImage";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
+
+// Define types for the clothing item
+interface ClothingItem {
+  id: string;
+  name: string;
+  category: string;
+  tags: string[];
+  imageUrl: string;
+  favorite: boolean;
+}
 
 const prisma = new PrismaClient();
 
@@ -14,7 +23,6 @@ export async function POST(request: Request) {
   try {
     console.log("POST /api/clothing - Starting request");
 
-    // Get the authenticated user
     const session = await getServerSession(authOptions);
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -46,22 +54,16 @@ export async function POST(request: Request) {
       );
     }
 
-    // Upload to Cloudinary and get URL
     try {
       console.log("Processing file...");
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
-
-      // Create a unique filename
       const filename = `${Date.now()}-${file.name}`;
-
-      // Create temp directory for file
       const tempDir = path.join(process.cwd(), "temp");
       await mkdir(tempDir, { recursive: true });
       const tempFilePath = path.join(tempDir, filename);
       await writeFile(tempFilePath, buffer);
 
-      // Upload to Cloudinary using your function
       const imageUrl = await uploadToCloudinary(tempFilePath);
 
       if (!imageUrl) {
@@ -73,11 +75,9 @@ export async function POST(request: Request) {
 
       console.log("Image uploaded successfully to Cloudinary:", imageUrl);
 
-      // Save to database using Prisma with the user's ID
-      console.log("Saving to database...");
       const clothingItem = await prisma.clothing_items.create({
         data: {
-          user_id: session.user.id, // Use the authenticated user's ID
+          user_id: session.user.id,
           name,
           category,
           image_url: imageUrl,
@@ -87,19 +87,19 @@ export async function POST(request: Request) {
           created_at: new Date().toISOString(),
         },
       });
+
       console.log("Database entry created:", clothingItem.id);
 
-      // Return a properly formatted response
-      return NextResponse.json({
-        data: {
-          id: clothingItem.id,
-          name: clothingItem.name,
-          category: category as any,
-          tags: tags as any[],
-          imageUrl: clothingItem.image_url,
-          favorite: clothingItem.favourite,
-        },
-      });
+      const response: ClothingItem = {
+        id: clothingItem.id,
+        name: clothingItem.name,
+        category: clothingItem.category,
+        tags: tags,
+        imageUrl: clothingItem.image_url,
+        favorite: clothingItem.favourite,
+      };
+
+      return NextResponse.json({ data: response });
     } catch (uploadError) {
       console.error(
         "Error during file processing or database save:",
@@ -120,9 +120,8 @@ export async function POST(request: Request) {
 }
 
 // Get all clothing items for the current user
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    // Get the authenticated user
     const session = await getServerSession(authOptions);
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -130,22 +129,25 @@ export async function GET(request: Request) {
 
     const clothingItems = await prisma.clothing_items.findMany({
       where: {
-        user_id: session.user.id, // Use the authenticated user's ID
+        user_id: session.user.id,
       },
       orderBy: {
         created_at: "desc",
       },
     });
 
-    return NextResponse.json({
-      data: clothingItems.map((item) => ({
+    const response = clothingItems.map(
+      (item): ClothingItem => ({
         id: item.id,
         name: item.name,
         category: item.category,
+        tags: [],
         imageUrl: item.image_url,
         favorite: item.favourite,
-      })),
-    });
+      })
+    );
+
+    return NextResponse.json({ data: response });
   } catch (error) {
     console.error("Error in GET /api/clothing:", error);
     return NextResponse.json(
@@ -156,7 +158,7 @@ export async function GET(request: Request) {
 }
 
 // Delete a clothing item
-export async function DELETE(request: Request) {
+export async function DELETE() {
   try {
     return NextResponse.json({ success: true });
   } catch (error) {

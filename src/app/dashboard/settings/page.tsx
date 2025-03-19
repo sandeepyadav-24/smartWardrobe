@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { FaCamera, FaEdit, FaCheck } from "react-icons/fa";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export default function SettingsPage() {
   const { data: session, update } = useSession();
@@ -197,11 +198,12 @@ export default function SettingsPage() {
                     >
                       {fullBodyImage ? (
                         <>
-                          <img
+                          <Image
                             src={fullBodyImage}
                             alt="Full body"
                             className="w-full h-full object-contain bg-gray-100"
                           />
+
                           <div
                             className="absolute inset-0 bg-black/50 opacity-0 
                                        group-hover:opacity-100 transition-opacity duration-200 

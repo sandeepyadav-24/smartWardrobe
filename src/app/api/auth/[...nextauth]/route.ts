@@ -3,8 +3,23 @@ import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { PrismaClient } from "@prisma/client";
+import { Session, DefaultSession } from "next-auth";
+import { JWT } from "next-auth/jwt";
 
 const prisma = new PrismaClient();
+
+interface SessionCallbackParams {
+  session: Session;
+  token: JWT;
+}
+
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+    } & DefaultSession["user"];
+  }
+}
 
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
@@ -19,9 +34,9 @@ export const authOptions = {
     strategy: "jwt" as const,
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  debug: true,
+  debug: process.env.NODE_ENV === "development",
   callbacks: {
-    async session({ session, token }: { session: any; token: any }) {
+    async session({ session, token }: SessionCallbackParams) {
       if (session.user && token.sub) {
         session.user.id = token.sub;
       }

@@ -6,7 +6,7 @@ import { authOptions } from "../../auth/[...nextauth]/route";
 const prisma = new PrismaClient();
 
 // Get user's credits
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -19,7 +19,8 @@ export async function GET(request: Request) {
     });
 
     return NextResponse.json({ credits: user?.credits ?? 0 });
-  } catch (error) {
+  } catch (err) {
+    console.error("Failed to fetch credits:", err);
     return NextResponse.json(
       { error: "Failed to fetch credits" },
       { status: 500 }
@@ -55,7 +56,8 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ credits: updatedUser.credits });
-  } catch (error) {
+  } catch (err) {
+    console.error("Failed to deduct credits:", err);
     return NextResponse.json(
       { error: "Failed to deduct credits" },
       { status: 500 }

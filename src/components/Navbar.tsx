@@ -1,11 +1,10 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+
 import { FaLeaf } from "react-icons/fa";
 //import { signInWithGoogle, signOut } from "@/lib/supabase";
 //import { useAuth } from "@/context/AuthContext";
 // const router = useRouter(); // Remove this line if not needed
-import { useSession, signIn, signOut } from "next-auth/react";
 
 export const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);

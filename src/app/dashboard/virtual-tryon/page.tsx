@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import {
   FaTshirt,
   FaSocks,
@@ -11,7 +12,6 @@ import {
 } from "react-icons/fa";
 import { GiArmoredPants, GiMonclerJacket } from "react-icons/gi";
 import { motion, AnimatePresence } from "framer-motion";
-import CreditPurchase from "@/components/CreditPurchase";
 
 type ClothingCategory =
   | "Tops"
@@ -440,7 +440,7 @@ export default function VirtualTryOnPage() {
                     className="h-[calc(100vh-400px)] min-h-[500px] rounded-xl overflow-hidden 
                                shadow-inner bg-gradient-to-br from-gray-50 to-gray-100"
                   >
-                    <img
+                    <Image
                       src={fullBodyImage}
                       alt="Your full body"
                       className="w-full h-full object-contain"
@@ -507,7 +507,7 @@ export default function VirtualTryOnPage() {
                                      }`}
                           >
                             <div className="aspect-square bg-gray-50">
-                              <img
+                              <Image
                                 src={item.imageUrl}
                                 alt={item.name}
                                 className="w-full h-full object-cover"
@@ -593,7 +593,7 @@ export default function VirtualTryOnPage() {
                       )}
                     </div>
                   ) : generatedImage ? (
-                    <img
+                    <Image
                       src={generatedImage}
                       alt="Virtual try-on result"
                       className="w-full h-full object-contain"
@@ -626,7 +626,7 @@ export default function VirtualTryOnPage() {
                                  group transition-all duration-300"
                       >
                         {selectedItems[category.label] ? (
-                          <img
+                          <Image
                             src={selectedItems[category.label]!.imageUrl}
                             alt={selectedItems[category.label]!.name}
                             className="w-full h-full object-cover rounded-lg"
@@ -702,8 +702,7 @@ export default function VirtualTryOnPage() {
                   <FaTimes className="w-5 h-5" />
                 </motion.button>
               </div>
-
-              <img
+              <Image
                 src={generatedImage}
                 alt="Virtual try-on result full size"
                 className="w-full h-auto"

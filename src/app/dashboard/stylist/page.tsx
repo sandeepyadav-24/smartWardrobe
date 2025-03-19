@@ -1,15 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  FaRobot,
-  FaTshirt,
-  FaSun,
-  FaCloud,
-  FaSnowflake,
-  FaUmbrella,
-  FaArrowRight,
-} from "react-icons/fa";
+import { FaRobot } from "react-icons/fa";
 
 type Message = {
   id: string;

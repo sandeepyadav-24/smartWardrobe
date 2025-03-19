@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import {
   FaPlus,
   FaSearch,
@@ -174,11 +175,12 @@ const AddItemModal = ({
             <div className="flex justify-center p-4 border-2 border-dashed rounded-lg">
               {preview ? (
                 <div className="relative">
-                  <img
+                  <Image
                     src={preview}
                     alt="Preview"
                     className="h-40 w-40 object-cover rounded-lg"
                   />
+
                   <button
                     type="button"
                     onClick={() => {
@@ -496,7 +498,7 @@ export default function ClosetPage() {
                   className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100"
                 >
                   <div className="aspect-square relative">
-                    <img
+                    <Image
                       src={item.imageUrl}
                       alt={item.name}
                       className="w-full h-full object-cover"
@@ -505,6 +507,7 @@ export default function ClosetPage() {
                         e.currentTarget.src = "/placeholder-image.jpg";
                       }}
                     />
+
                     {item.favorite && (
                       <div className="absolute top-2 right-2 text-red-500">
                         <FaHeart />

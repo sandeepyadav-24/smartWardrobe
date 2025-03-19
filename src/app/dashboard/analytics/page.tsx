@@ -7,26 +7,10 @@ import {
   FaCoins,
   FaCalendarAlt,
   FaStar,
-  FaTrash,
   FaShoppingBag,
   FaArrowUp,
-  FaArrowDown,
   FaHistory,
 } from "react-icons/fa";
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
 
 // Types
 type AnalyticsMode =

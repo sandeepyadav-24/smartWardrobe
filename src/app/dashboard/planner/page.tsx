@@ -1,17 +1,15 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import {
-  FaPlus,
   FaCalendarAlt,
   FaTshirt,
   FaSuitcase,
-  FaBell,
   FaTimes,
   FaArrowLeft,
   FaArrowRight,
   FaSave,
-  FaEdit,
 } from "react-icons/fa";
 import {
   format,
@@ -423,7 +421,7 @@ export default function PlannerPage() {
                               className="aspect-square rounded-lg overflow-hidden shadow-sm 
                                        group-hover:shadow-md transition-all duration-200"
                             >
-                              <img
+                              <Image
                                 src={item.imageUrl}
                                 alt={item.name}
                                 className="w-full h-full object-cover transform 
@@ -521,7 +519,7 @@ export default function PlannerPage() {
                                            : "border-transparent hover:border-blue-500"
                                        }`}
                             >
-                              <img
+                              <Image
                                 src={item.imageUrl}
                                 alt={item.name}
                                 className="w-full h-24 object-cover"
@@ -544,11 +542,12 @@ export default function PlannerPage() {
                                   className="aspect-square rounded-lg overflow-hidden shadow-sm 
                                              group-hover:shadow-md transition-all duration-200"
                                 >
-                                  <img
+                                  <Image
                                     src={item.imageUrl}
                                     alt={item.name}
                                     className="w-full h-full object-cover"
                                   />
+
                                   <button
                                     onClick={() => toggleItemSelection(item)}
                                     className="absolute top-2 right-2 p-1 bg-white rounded-full 
@@ -734,7 +733,7 @@ export default function PlannerPage() {
                             }`}
                           >
                             <div className="h-32 bg-gray-100">
-                              <img
+                              <Image
                                 src={item.imageUrl}
                                 alt={item.name}
                                 className="w-full h-full object-cover"
@@ -768,7 +767,7 @@ export default function PlannerPage() {
                             className="bg-gray-100 rounded-full px-3 py-1 flex items-center space-x-2"
                           >
                             <div className="w-6 h-6 rounded-full overflow-hidden">
-                              <img
+                              <Image
                                 src={item.imageUrl}
                                 alt={item.name}
                                 className="w-full h-full object-cover"
