@@ -9,11 +9,9 @@ import {
   FaHatCowboy,
   FaSocks,
   FaHeart,
-  FaFilter,
   FaTimes,
   FaCamera,
   FaUpload,
-  FaWindowClose,
 } from "react-icons/fa";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -63,6 +61,7 @@ const AddItemModal = ({
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
 
   const availableTags = [
     "Casual",
@@ -73,16 +72,29 @@ const AddItemModal = ({
     "Winter",
   ];
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setImage(file);
-      // Create preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      setImageLoading(true);
+      try {
+        if (file.size > 5 * 1024 * 1024) {
+          // 5MB limit
+          throw new Error(
+            "File size too large. Please choose an image under 5MB."
+          );
+        }
+        setImage(file);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setPreview(reader.result as string);
+          setImageLoading(false);
+        };
+        reader.readAsDataURL(file);
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        alert(error instanceof Error ? error.message : "Error uploading image");
+        setImageLoading(false);
+      }
     }
   };
 
@@ -132,16 +144,19 @@ const AddItemModal = ({
   };
 
   return (
-    <div className="min-h-screen h-screen overflow-y-auto fixed inset-0  bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 max-h-screen overflow-y-auto">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         className="bg-white rounded-xl w-full max-w-lg"
       >
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form
+          onSubmit={handleSubmit}
+          className="p-4 md:p-6 space-y-4 md:space-y-6"
+        >
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold">Add New Item</h2>
+            <h2 className="text-lg md:text-xl font-bold">Add New Item</h2>
             <button
               type="button"
               onClick={onClose}
@@ -176,8 +191,8 @@ const AddItemModal = ({
                   </button>
                 </div>
               ) : (
-                <div className="flex space-x-4">
-                  <label className="flex items-center space-x-2 px-4 py-2 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200">
+                <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
+                  <label className="flex items-center justify-center space-x-2 px-4 py-2 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200">
                     <FaCamera className="text-gray-600" />
                     <span>Take Photo</span>
                     <input
@@ -188,7 +203,7 @@ const AddItemModal = ({
                       onChange={handleImageUpload}
                     />
                   </label>
-                  <label className="flex items-center space-x-2 px-4 py-2 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200">
+                  <label className="flex items-center justify-center space-x-2 px-4 py-2 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200">
                     <FaUpload className="text-gray-600" />
                     <span>Upload Image</span>
                     <input
@@ -304,22 +319,28 @@ export default function ClosetPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  // Redirect if not authenticated
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth/signin");
+    if (status === "loading") return;
+    if (!session) {
+      router.replace("/auth/signin");
     }
-  }, [status, router]);
+  }, [session, status, router]);
+
+  if (status === "loading") {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] =
     useState<ClothingCategory>("All");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [clothingItems, setClothingItems] = useState<ClothingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  //const { user } = useAuth();
 
   const categories: { label: ClothingCategory; icon: React.ReactNode }[] = [
     { label: "All", icon: <FaTshirt /> },
@@ -338,17 +359,18 @@ export default function ClosetPage() {
         const response = await fetch("/api/clothing");
 
         if (!response.ok) {
-          throw new Error("Failed to fetch clothing items");
+          const errorData = await response.json();
+          throw new Error(
+            errorData.message || "Failed to fetch clothing items"
+          );
         }
 
         const { data } = await response.json();
-
-        // Transform the data to match our ClothingItem interface
         const transformedData = data.map((item: any) => ({
           id: item.id,
           name: item.name,
           category: item.category as ClothingCategory,
-          tags: item.tags || [], // Handle if tags are not present
+          tags: item.tags || [],
           imageUrl: item.imageUrl,
           favorite: item.favorite,
           lastWorn: item.lastWorn ? new Date(item.lastWorn) : undefined,
@@ -384,206 +406,172 @@ export default function ClosetPage() {
   });
 
   return (
-    <div className="h-screen overflow-y-auto bg-gray-50">
-      {/* Desktop Header */}
-      <div className="hidden md:block sticky top-0 z-20 border-b bg-white/95 backdrop-blur-md">
-        <div className="max-w-[100rem] mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
-            <motion.h1
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 
-                       bg-clip-text text-transparent"
+    <div className="w-full min-h-screen bg-white">
+      {/* Sticky Header Section */}
+      <div className="sticky top-0 left-0 right-0 z-10 bg-white">
+        {/* Header */}
+        <header className="border-b border-gray-200 px-4 py-3 flex justify-between items-center">
+          <h1 className="text-xl font-bold text-gray-800">Smart Closet</h1>
+          <button
+            onClick={() => {
+              /* handle menu toggle */
+            }}
+            className="text-gray-600 lg:hidden"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
             >
-              Smart Closet
-            </motion.h1>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center space-x-2 px-6 py-2.5 bg-gradient-to-r 
-                       from-blue-600 to-blue-800 text-white rounded-xl shadow-md 
-                       hover:shadow-lg transition-all duration-200"
-              onClick={() => setIsAddModalOpen(true)}
-            >
-              <FaPlus className="text-white/90" />
-              <span>Add New Item</span>
-            </motion.button>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </button>
+        </header>
+
+        {/* Search Bar */}
+        <div className="px-4 py-2 border-b border-gray-100 w-full">
+          <div className="relative">
+            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search your closet..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-full bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        </div>
+
+        {/* Category Pills */}
+        <div className="border-b border-gray-100 w-full">
+          <div className="px-4 py-2 flex space-x-2 overflow-x-auto no-scrollbar">
+            {categories.map((category) => (
+              <button
+                key={category.label}
+                onClick={() => setSelectedCategory(category.label)}
+                className={`flex-none px-4 py-2 rounded-full whitespace-nowrap text-sm
+                  ${
+                    selectedCategory === category.label
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
+              >
+                {category.label}
+              </button>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-[100rem] mx-auto px-4 pb-24 md:pb-8">
-        {/* Search and Filters */}
-        <div className="my-6">
-          <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
-            <motion.div
-              className="relative flex-1"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-            >
-              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search your closet..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl 
-                         bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 
-                         focus:ring-blue-500 transition-all duration-200"
-              />
-            </motion.div>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              onClick={() => setIsFilterOpen(!isFilterOpen)}
-              className="p-3 bg-white/80 backdrop-blur-sm border border-gray-200 
-                       rounded-xl hover:bg-gray-50 md:self-start shadow-sm 
-                       hover:shadow transition-all duration-200"
-            >
-              <FaFilter className="text-gray-600" />
-            </motion.button>
-          </div>
-        </div>
-
-        {/* Category Filters */}
-        <motion.div
-          className="flex space-x-2 overflow-x-auto pb-4 scrollbar-hide"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          {categories.map((category) => (
-            <motion.button
-              key={category.label}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setSelectedCategory(category.label)}
-              className={`px-4 py-2 rounded-xl whitespace-nowrap transition-all duration-200
-                        ${
-                          selectedCategory === category.label
-                            ? "bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-md"
-                            : "bg-white/80 backdrop-blur-sm text-gray-600 hover:bg-gray-50"
-                        }`}
-            >
-              {category.label}
-            </motion.button>
-          ))}
-        </motion.div>
-
-        {/* Loading State */}
-        {loading && (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
-          </div>
-        )}
-
-        {/* Error State */}
-        {error && (
-          <div className="bg-red-50 text-red-600 p-4 rounded-lg my-6">
-            {error}
-          </div>
-        )}
-
-        {/* Empty State */}
-        {!loading && !error && filteredItems.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-gray-400 text-5xl mb-4">
-              <FaTshirt className="mx-auto" />
+      {/* Main Content Area */}
+      <main className="w-full pb-20">
+        <div className="p-4">
+          {/* Loading State */}
+          {loading && (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
             </div>
-            <h3 className="text-xl font-medium text-gray-600 mb-2">
-              Your closet is empty
-            </h3>
-            <p className="text-gray-500 mb-6">
-              {searchQuery || selectedCategory !== "All"
-                ? "No items match your current filters"
-                : "Add your first clothing item to get started"}
-            </p>
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-            >
-              Add New Item
-            </button>
-          </div>
-        )}
+          )}
 
-        {/* Clothing Grid */}
-        {!loading && !error && filteredItems.length > 0 && (
-          <motion.div
-            className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-6"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-          >
-            {filteredItems.map((item, index) => (
-              <motion.div
-                key={item.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -5, scale: 1.02 }}
-                className="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm hover:shadow-md 
-                         transition-all duration-200 overflow-hidden"
-              >
-                <div className="aspect-square relative">
-                  <img
-                    src={item.imageUrl}
-                    alt={item.name}
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                  {item.favorite && (
-                    <div className="absolute top-2 right-2 text-red-500">
-                      <FaHeart className="w-5 h-5" />
-                    </div>
-                  )}
-                </div>
-                <div className="p-4">
-                  <h3 className="font-medium text-gray-800 truncate">
-                    {item.name}
-                  </h3>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {item.tags &&
-                      item.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="text-xs px-2 py-1 bg-gray-100 rounded-full text-gray-600"
-                        >
-                          {tag}
-                        </span>
-                      ))}
+          {/* Error State */}
+          {error && (
+            <div className="bg-red-50 text-red-600 p-4 rounded-lg my-4">
+              {error}
+            </div>
+          )}
+
+          {/* Clothing Grid */}
+          {!loading && !error && filteredItems.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              {filteredItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100"
+                >
+                  <div className="aspect-square relative">
+                    <img
+                      src={item.imageUrl}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.src = "/placeholder-image.jpg";
+                      }}
+                    />
+                    {item.favorite && (
+                      <div className="absolute top-2 right-2 text-red-500">
+                        <FaHeart />
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-2">
+                    <h3 className="text-sm font-medium text-gray-800 truncate">
+                      {item.name}
+                    </h3>
+                    {item.tags && item.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {item.tags.slice(0, 2).map((tag) => (
+                          <span
+                            key={tag}
+                            className="text-xs px-1.5 py-0.5 bg-gray-100 rounded-full text-gray-600"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                        {item.tags.length > 2 && (
+                          <span className="text-xs text-gray-500">
+                            +{item.tags.length - 2}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-      </div>
+              ))}
+            </div>
+          )}
 
-      {/* Mobile Add Button */}
-      <motion.div
-        className="md:hidden fixed bottom-6 right-6 z-50"
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ type: "spring", stiffness: 260, damping: 20 }}
-      >
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
+          {/* Empty State */}
+          {!loading && !error && filteredItems.length === 0 && (
+            <div className="text-center py-12">
+              <div className="text-gray-400 text-6xl mb-4">
+                <FaTshirt className="mx-auto" />
+              </div>
+              <h3 className="text-xl font-medium text-gray-700 mb-2">
+                Your closet is empty
+              </h3>
+              <p className="text-gray-500 mb-6">
+                Add your first clothing item to get started
+              </p>
+              <button
+                onClick={() => setIsAddModalOpen(true)}
+                className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+              >
+                Add New Item
+              </button>
+            </div>
+          )}
+        </div>
+      </main>
+
+      {/* Floating Action Button */}
+      <div className="fixed bottom-6 right-6">
+        <button
           onClick={() => setIsAddModalOpen(true)}
-          className="w-14 h-14 bg-gradient-to-r from-blue-600 to-blue-800 
-                   rounded-full flex items-center justify-center text-white 
-                   shadow-lg hover:shadow-xl transition-all duration-200"
+          className="w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg"
         >
           <FaPlus className="w-6 h-6" />
-        </motion.button>
-      </motion.div>
+        </button>
+      </div>
 
-      {/* Add New Item Modal */}
+      {/* Add Item Modal */}
       <AnimatePresence>
         {isAddModalOpen && (
           <AddItemModal

@@ -109,7 +109,7 @@ export default function AIStylistPage() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b 
+        className="sticky top-0  bg-white/80 backdrop-blur-sm border-b 
                  border-gray-100 px-4 md:px-8 py-4"
       >
         <div className="max-w-[1200px] mx-auto flex items-center justify-between">

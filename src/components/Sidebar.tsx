@@ -65,7 +65,7 @@ export function Sidebar() {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="md:hidden fixed top-4 left-4 z-[60] p-2 bg-white rounded-lg shadow-lg"
+        className="md:hidden fixed top-4 right-4 z-[60] p-2 bg-white rounded-lg shadow-lg"
       >
         {isSidebarOpen ? <FaTimes /> : <FaBars />}
       </motion.button>

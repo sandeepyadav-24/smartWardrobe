@@ -15,8 +15,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Smart Wardrobe",
-  description: "Manage your clothing collection",
+  title: "Smart Wardrobe - Your Digital Closet",
+  description:
+    "Organize your wardrobe, plan outfits, and get AI styling recommendations.",
+  viewport: "width=device-width, initial-scale=1",
 };
 
 export default function RootLayout({

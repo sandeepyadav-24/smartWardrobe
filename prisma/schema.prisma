@@ -63,6 +63,7 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
+  credits       Int       @default(10)
   created_at    DateTime  @default(now())
   updated_at    DateTime  @updatedAt
   

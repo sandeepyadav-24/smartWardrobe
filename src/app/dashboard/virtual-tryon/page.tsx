@@ -11,6 +11,7 @@ import {
 } from "react-icons/fa";
 import { GiArmoredPants, GiMonclerJacket } from "react-icons/gi";
 import { motion, AnimatePresence } from "framer-motion";
+import CreditPurchase from "@/components/CreditPurchase";
 
 type ClothingCategory =
   | "Tops"
@@ -61,6 +62,8 @@ export default function VirtualTryOnPage() {
   const [intermediateImages, setIntermediateImages] = useState<string[]>([]);
   const [isFullSizeModalOpen, setIsFullSizeModalOpen] =
     useState<boolean>(false);
+  const [credits, setCredits] = useState<number>(0);
+  const [isCheckingCredits, setIsCheckingCredits] = useState(false);
 
   // Fetch user's full body image
   useEffect(() => {
@@ -116,6 +119,25 @@ export default function VirtualTryOnPage() {
     }
   }, [session]);
 
+  // Fetch user's credits
+  useEffect(() => {
+    const fetchCredits = async () => {
+      try {
+        const response = await fetch("/api/user/credits");
+        if (response.ok) {
+          const data = await response.json();
+          setCredits(data.credits);
+        }
+      } catch (error) {
+        console.error("Error fetching credits:", error);
+      }
+    };
+
+    if (session) {
+      fetchCredits();
+    }
+  }, [session]);
+
   const handleItemSelect = (item: ClothingItem) => {
     setSelectedItems({
       ...selectedItems,
@@ -129,24 +151,50 @@ export default function VirtualTryOnPage() {
       return;
     }
 
-    // Check if at least one item is selected
-    const hasSelectedItem = Object.values(selectedItems).some(
+    const selectedItemsCount = Object.values(selectedItems).filter(
       (item) => item !== null
-    );
-    if (!hasSelectedItem) {
+    ).length;
+
+    if (selectedItemsCount === 0) {
       setError("Please select at least one clothing item");
       return;
     }
 
-    setIsGenerating(true);
-    setError(null);
-    setProgressMessage("Preparing your virtual try-on...");
-    setProgressPercent(0);
-    setCurrentProcessingItem(null);
-    setIntermediateImages([]);
-    setGeneratedImage(null);
+    // Calculate total credits needed (10 credits per item)
+    const creditsNeeded = selectedItemsCount * 10;
 
+    if (credits < creditsNeeded) {
+      setError(
+        `Insufficient credits. You need ${creditsNeeded} credits but have ${credits}`
+      );
+      return;
+    }
+
+    setIsCheckingCredits(true);
     try {
+      // Attempt to deduct credits (10 per item)
+      const response = await fetch("/api/user/credits", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: creditsNeeded }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to deduct credits");
+      }
+
+      const { credits: updatedCredits } = await response.json();
+      setCredits(updatedCredits);
+
+      // Continue with the existing try-on logic
+      setIsGenerating(true);
+      setError(null);
+      setProgressMessage("Preparing your virtual try-on...");
+      setProgressPercent(0);
+      setCurrentProcessingItem(null);
+      setIntermediateImages([]);
+      setGeneratedImage(null);
+
       // Prepare the data for the API request
       const selectedItemsArray = Object.values(selectedItems)
         .filter((item) => item !== null)
@@ -156,7 +204,7 @@ export default function VirtualTryOnPage() {
         }));
 
       // Send the request to your backend API
-      const response = await fetch("/api/virtual-tryon", {
+      const tryOnResponse = await fetch("/api/virtual-tryon", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -167,12 +215,12 @@ export default function VirtualTryOnPage() {
         }),
       });
 
-      if (!response.ok) {
+      if (!tryOnResponse.ok) {
         throw new Error("Failed to generate try-on image");
       }
 
       // Process the streaming response
-      const reader = response.body?.getReader();
+      const reader = tryOnResponse.body?.getReader();
       if (!reader) {
         throw new Error("Failed to read response stream");
       }
@@ -240,6 +288,7 @@ export default function VirtualTryOnPage() {
       );
     } finally {
       setIsGenerating(false);
+      setIsCheckingCredits(false);
     }
   };
 
@@ -257,16 +306,85 @@ export default function VirtualTryOnPage() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b 
+        className="sticky top-0  bg-white/80 backdrop-blur-sm border-b 
                  border-gray-100 px-4 md:px-8 py-4"
       >
         <div className="max-w-[1800px] mx-auto">
-          <h1
-            className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 
-                       bg-clip-text text-transparent"
-          >
-            Virtual Try-On Studio
-          </h1>
+          {/* Mobile Layout */}
+          <div className="md:hidden flex flex-col gap-3">
+            <h1
+              className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 
+                          bg-clip-text text-transparent"
+            >
+              Virtual Try-On Studio
+            </h1>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm bg-blue-50 px-3 py-1.5 rounded-lg text-blue-600 font-medium">
+                1 Try-on = 10 Credits
+              </span>
+              <div
+                className="flex items-center gap-2 bg-gradient-to-r from-blue-50 to-indigo-50 
+                            px-3 py-2 rounded-xl border border-blue-100 shadow-sm"
+              >
+                <div className="flex flex-col">
+                  <span className="text-xs text-blue-600 font-medium">
+                    Credits
+                  </span>
+                  <span
+                    className="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 
+                                 bg-clip-text text-transparent"
+                  >
+                    {credits}
+                  </span>
+                </div>
+                <div
+                  className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 
+                              flex items-center justify-center shadow-md"
+                >
+                  <span className="text-white text-base">💎</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop Layout */}
+          <div className="hidden md:flex justify-between items-center">
+            <h1
+              className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 
+                          bg-clip-text text-transparent"
+            >
+              Virtual Try-On Studio
+            </h1>
+            <div className="flex items-center gap-4">
+              <div className="text-sm text-gray-600">
+                <span className="bg-blue-50 px-3 py-1.5 rounded-lg">
+                  1 Try-on = 10 Credits
+                </span>
+              </div>
+              <div
+                className="flex items-center gap-3 bg-gradient-to-r from-blue-50 to-indigo-50 
+                            px-4 py-2 rounded-xl border border-blue-100 shadow-sm"
+              >
+                <div className="flex flex-col">
+                  <span className="text-xs text-blue-600 font-medium">
+                    Available Credits
+                  </span>
+                  <span
+                    className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 
+                                 bg-clip-text text-transparent"
+                  >
+                    {credits}
+                  </span>
+                </div>
+                <div
+                  className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 
+                              flex items-center justify-center shadow-md"
+                >
+                  <span className="text-white text-lg">💎</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </motion.div>
 

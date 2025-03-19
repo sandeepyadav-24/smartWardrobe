@@ -12,6 +12,7 @@
     "@auth/prisma-adapter": "^2.8.0",
     "@fal-ai/client": "^1.2.3",
     "@prisma/client": "^6.5.0",
+    "@stripe/stripe-js": "^6.1.0",
     "cloudinary": "^2.6.0",
     "date-fns": "^4.1.0",
     "formidable": "^3.5.2",
@@ -22,7 +23,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0",
-    "recharts": "^2.15.1"
+    "recharts": "^2.15.1",
+    "stripe": "^17.7.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
