@@ -5,7 +5,7 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     // Get the authenticated user
     const session = await getServerSession(authOptions);
@@ -18,7 +18,7 @@ export async function GET(request: Request) {
 
     try {
       // Fetch the user's profile data
-      const user = await prisma.User.findUnique({
+      const user = await prisma.user.findUnique({
         where: {
           id: session.user.id,
         },
