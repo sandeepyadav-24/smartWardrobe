@@ -26,13 +26,6 @@ type ClothingCategory =
   | "Shoes"
   | "Accessories"
   | "Outerwear";
-type ClothingTag =
-  | "Casual"
-  | "Formal"
-  | "Party"
-  | "Office"
-  | "Summer"
-  | "Winter";
 
 interface ClothingItem {
   id: string;
@@ -172,15 +165,21 @@ const AddItemModal = ({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Image
             </label>
-            <div className="flex justify-center p-4 border-2 border-dashed rounded-lg">
+            <div className="flex justify-center p-4 border-2 border-dashed rounded-lg relative">
+              {imageLoading && (
+                <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent"></div>
+                </div>
+              )}
               {preview ? (
                 <div className="relative">
                   <Image
                     src={preview}
                     alt="Preview"
+                    width={160}
+                    height={160}
                     className="h-40 w-40 object-cover rounded-lg"
                   />
-
                   <button
                     type="button"
                     onClick={() => {

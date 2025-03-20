@@ -39,6 +39,15 @@ interface ClothingItem {
   favorite?: boolean;
 }
 
+interface SavedOutfit {
+  id: string;
+  name: string;
+  items: ClothingItem[];
+  notes?: string;
+  occasion?: string;
+  date?: string; // String format for localStorage
+}
+
 export default function PlannerPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -105,7 +114,7 @@ export default function PlannerPage() {
         if (savedOutfits) {
           const parsedOutfits = JSON.parse(savedOutfits);
           // Convert date strings back to Date objects
-          const outfitsWithDates = parsedOutfits.map((outfit: any) => ({
+          const outfitsWithDates = parsedOutfits.map((outfit: SavedOutfit) => ({
             ...outfit,
             date: outfit.date ? new Date(outfit.date) : undefined,
           }));
@@ -399,6 +408,8 @@ export default function PlannerPage() {
                             <Image
                               src={item.imageUrl}
                               alt={item.name}
+                              width={200}
+                              height={200}
                               className="w-full h-full object-cover transform 
                                        group-hover:scale-105 transition-transform duration-200"
                             />
@@ -496,7 +507,9 @@ export default function PlannerPage() {
                               <Image
                                 src={item.imageUrl}
                                 alt={item.name}
-                                className="w-full h-24 object-cover"
+                                width={200}
+                                height={200}
+                                className="w-full h-full object-cover"
                               />
                             </motion.div>
                           ))}
@@ -505,7 +518,7 @@ export default function PlannerPage() {
                         {/* Selected Items */}
                         {selectedItems.length > 0 && (
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                            {selectedItems.map((item, index) => (
+                            {selectedItems.map((item) => (
                               <motion.div
                                 key={item.id}
                                 initial={{ opacity: 0, scale: 0.9 }}
@@ -519,6 +532,8 @@ export default function PlannerPage() {
                                   <Image
                                     src={item.imageUrl}
                                     alt={item.name}
+                                    width={200}
+                                    height={200}
                                     className="w-full h-full object-cover"
                                   />
 
@@ -710,6 +725,8 @@ export default function PlannerPage() {
                               <Image
                                 src={item.imageUrl}
                                 alt={item.name}
+                                width={200}
+                                height={200}
                                 className="w-full h-full object-cover"
                               />
                             </div>
@@ -744,6 +761,8 @@ export default function PlannerPage() {
                               <Image
                                 src={item.imageUrl}
                                 alt={item.name}
+                                width={24}
+                                height={24}
                                 className="w-full h-full object-cover"
                               />
                             </div>

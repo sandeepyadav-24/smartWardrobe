@@ -167,7 +167,7 @@ export default function AnalyticsPage() {
 
                 <p className="text-gray-600">
                   We need at least a week of wardrobe usage data to generate
-                  meaningful insights. You've been using the app for{" "}
+                  meaningful insights. You&apos;ve been using the app for{" "}
                   {daysOfData} {daysOfData === 1 ? "day" : "days"}.
                 </p>
 

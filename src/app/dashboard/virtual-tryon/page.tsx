@@ -443,6 +443,8 @@ export default function VirtualTryOnPage() {
                     <Image
                       src={fullBodyImage}
                       alt="Your full body"
+                      width={500}
+                      height={800}
                       className="w-full h-full object-contain"
                     />
                   </div>
@@ -510,6 +512,8 @@ export default function VirtualTryOnPage() {
                               <Image
                                 src={item.imageUrl}
                                 alt={item.name}
+                                width={200}
+                                height={200}
                                 className="w-full h-full object-cover"
                               />
                             </div>
@@ -596,6 +600,8 @@ export default function VirtualTryOnPage() {
                     <Image
                       src={generatedImage}
                       alt="Virtual try-on result"
+                      width={800}
+                      height={1000}
                       className="w-full h-full object-contain"
                     />
                   ) : (
@@ -629,6 +635,8 @@ export default function VirtualTryOnPage() {
                           <Image
                             src={selectedItems[category.label]!.imageUrl}
                             alt={selectedItems[category.label]!.name}
+                            width={100}
+                            height={100}
                             className="w-full h-full object-cover rounded-lg"
                           />
                         ) : (
@@ -658,6 +666,43 @@ export default function VirtualTryOnPage() {
                     <p className="text-red-700">{error}</p>
                   </div>
                 )}
+
+                {isCheckingCredits && (
+                  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+                    <div className="bg-white p-6 rounded-xl shadow-xl">
+                      <div className="flex items-center space-x-3">
+                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent"></div>
+                        <span>Checking credits...</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-4 mt-4">
+                  {intermediateImages.length > 0 && (
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-700 mb-2">
+                        Processing Steps
+                      </h3>
+                      <div className="grid grid-cols-4 gap-2">
+                        {intermediateImages.map((img, index) => (
+                          <div
+                            key={index}
+                            className="aspect-square rounded-lg overflow-hidden"
+                          >
+                            <Image
+                              src={img}
+                              alt={`Processing step ${index + 1}`}
+                              width={100}
+                              height={100}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </motion.div>
             </div>
           )}
