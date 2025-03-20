@@ -1,9 +1,9 @@
 // src/app/api/auth/[...nextauth]/route.ts
-import NextAuth from "next-auth";
+import NextAuth, { DefaultSession } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { PrismaClient } from "@prisma/client";
-import { Session, DefaultSession } from "next-auth";
+import { Session } from "next-auth";
 import { JWT } from "next-auth/jwt";
 
 const prisma = new PrismaClient();
@@ -43,7 +43,6 @@ export const authOptions = {
       return session;
     },
     async redirect({ url, baseUrl }: { url: string; baseUrl: string }) {
-      // Force redirect to dashboard after sign in
       if (url.startsWith(baseUrl)) {
         return `${baseUrl}/dashboard`;
       }
